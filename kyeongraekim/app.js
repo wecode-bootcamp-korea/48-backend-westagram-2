@@ -1,1 +1,1 @@
-wecode 48기 2주차 퐈이팅!!!
+wecode 48기 Backend 끝까지 화이팅!!
