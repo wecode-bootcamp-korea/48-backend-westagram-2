@@ -1,11 +1,13 @@
 require("dotenv").config();
 
+// 사용할 library를 미리 불러옴.
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
 
 const { DataSource } = require("typeorm");
 
+// DB setting
 const myDataSource = new DataSource({
   type: process.env.TYPEORM_CONNECTION,
   host: process.env.TYPEORM_HOST,
@@ -19,6 +21,8 @@ myDataSource.initialize().then(() => {
   console.log("Data Source has been initialized!");
 });
 
+
+// express server 만들기 시작
 const app = express();
 
 app.use(cors());
