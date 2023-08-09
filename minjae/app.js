@@ -8,6 +8,24 @@ const port = 3000;
 
 const app = express();
 
+const bcrypt = require("bcrypt");
+const saltRounds = 12;
+
+/*
+const makeHash = async (password, saltRounds) => {
+  return await bcrypt.hash(password, saltRounds);
+};
+
+
+const getEncryptedPassword = async () => {
+  const hashedPassword = await makeHash(password, saltRounds);
+  console.log("다음은 암호화된 비밀번호 입니다: ", hashedPassword);
+};
+
+
+getEncryptedPassword();
+*/
+
 const mySqlDataSource = new DataSource({
   type: process.env.DB_CONNECTION,
   host: process.env.DB_HOST,
@@ -28,10 +46,16 @@ app.get("/ping", (req, res) => {
 
 app.post("/users", async (req, res) => {
   const { id, pwd, name, phone, email, guest_yn } = req.body;
+  const makeHash = async (pwd, saltRounds) => {
+    return await bcrypt.hash(pwd, saltRounds);
+  };
+  const cryptedpassword = await makeHash(pwd, saltRounds);
+
+  console.log(cryptedpassword);
 
   await mySqlDataSource.query(
     "INSERT INTO westagram.users (user_id, password, name, phone, email, guest_yn) VALUES (?, ?, ?, ?, ?, ?);",
-    [id, pwd, name, phone, email, guest_yn]
+    [id, cryptedpassword, name, phone, email, guest_yn]
   );
   res.status(201).json({ message: "successfully created" });
 });
