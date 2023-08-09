@@ -18,11 +18,22 @@ const mySqlDataSource = new DataSource({
 });
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 app.use(cors());
 app.use(morgan("dev"));
 
 app.get("/ping", (req, res) => {
   res.json({ message: "pong" });
+});
+
+app.post("/users", async (req, res) => {
+  const { id, pwd, name, phone, email, guest_yn } = req.body;
+
+  await mySqlDataSource.query(
+    "INSERT INTO westagram.users (user_id, password, name, phone, email, guest_yn) VALUES (?, ?, ?, ?, ?, ?);",
+    [id, pwd, name, phone, email, guest_yn]
+  );
+  res.status(201).json({ message: "successfully created" });
 });
 
 app.listen(port, async () => {
