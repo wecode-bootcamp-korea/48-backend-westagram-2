@@ -8,6 +8,9 @@ const port = 3000;
 
 const app = express();
 
+const bcrypt = require("bcrypt");
+const saltRounds = 12;
+
 const mySqlDataSource = new DataSource({
   type: process.env.DB_CONNECTION,
   host: process.env.DB_HOST,
@@ -27,11 +30,17 @@ app.get("/ping", (req, res) => {
 });
 
 app.post("/users", async (req, res) => {
-  const { id, pwd, name, phone, email, guest_yn } = req.body;
+  const { user_id, pwd, name, phone, email, guest_yn } = req.body;
+  const makeHash = async (pwd, saltRounds) => {
+    return await bcrypt.hash(pwd, saltRounds);
+  };
+  const cryptedpassword = await makeHash(pwd, saltRounds);
+
+  console.log(cryptedpassword);
 
   await mySqlDataSource.query(
     "INSERT INTO westagram.users (user_id, password, name, phone, email, guest_yn) VALUES (?, ?, ?, ?, ?, ?);",
-    [id, pwd, name, phone, email, guest_yn]
+    [user_id, cryptedpassword, name, phone, email, guest_yn]
   );
   res.status(201).json({ message: "successfully created" });
 });
