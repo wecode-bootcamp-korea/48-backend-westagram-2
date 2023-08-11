@@ -8,12 +8,12 @@ const jwt = require("jsonwebtoken")
 const { DataSource } = require("typeorm");
 
 const DataSource1 = new DataSource({
-  type: process.env.DB_CONNECTION,
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  username: process.env.DB_USERNAME,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_DATABASE,
+  type: process.env.TYPEORM_CONNECTION,
+  host: process.env.TYPEORM_HOST,
+  port: process.env.TYPEORM_PORT,
+  username: process.env.TYPEORM_USERNAME,
+  password: process.env.TYPEORM_PASSWORD,
+  database: process.env.TYPEORM_DATABASE,
 });
 
 DataSource1.initialize().then(() => {
@@ -22,7 +22,6 @@ DataSource1.initialize().then(() => {
 
 const app = express();
 app.use(express.json());
-app.use(express.urlencoded({extended: false}));
 app.use(cors());
 app.use(morgan("combined"));
 
@@ -33,28 +32,27 @@ app.get("/ping", function (req, res, next) {
   
 app.post('/users', async (req, res) => {
 	try {
-  const { name, password} = req.body;
+  const { user_id, password} = req.body;
     
-  const hashedPassword = await bcrypt.hash(password, 12);
+  const hashedPassword = await bcrypt.hash(password, saltRounds);
 	await DataSource1.query(
     `
       INSERT INTO users (
-        name,
+        user_id,
         password
       ) VALUES (
         ?,
         ?)
       `,
-		[ name, hashedPassword]
+		[ user_id, hashedPassword]
 	); 
-    res.status(201).json({message: ok});
+    res.status(201).end();
 	
   } 
   catch (err) {
     res.status(err.statusCode || 400).json({ message: err.message });
   }
   });
-
   app.post('/users', async(req, res) => {
     await DataSource1.query(
 		`SELECT *
@@ -64,12 +62,12 @@ app.post('/users', async (req, res) => {
 	});
 });
 
-  // const password = 'password'; 
-  // const saltRounds = 12;
+  const password = 'password'; 
+  const saltRounds = 12;
   
-  // const makeHash = async (password, saltRounds) => {
-  //   return await bcrypt.hash(password, saltRounds);
-  // }
+  const makeHash = async (password, saltRounds) => {
+    return await bcrypt.hash(password, saltRounds);
+  }
   
 
   app.listen(3000, () => {
@@ -77,9 +75,9 @@ app.post('/users', async (req, res) => {
 })
 
 
-// const main = async () => { 
-//     const hashedPassword = await makeHash(password, saltRounds); 
-//     console.log(hashedPassword);
-//   }
+const main = async () => { 
+    const hashedPassword = await makeHash(password, saltRounds); 
+    console.log(hashedPassword);
+  }
   
-//   main()
+  main()
